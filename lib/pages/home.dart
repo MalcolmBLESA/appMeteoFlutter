@@ -84,7 +84,7 @@ class _HomePageState extends State<HomePage> {
     
     if (data != null) {
       setState(() {
-        String nowHour = DateTime.now().toIso8601String().substring(0, 13) + ":00";
+        String nowHour = "${DateTime.now().toIso8601String().substring(0, 13)}:00";
         int index = data['hourly']['time'].indexOf(nowHour);
         if (index == -1) index = 0;
 
@@ -117,9 +117,17 @@ class _HomePageState extends State<HomePage> {
   if (lastWeatherData == null) return;
 
   setState(() {
-    selectedDayIndex = dayIndex;
-    // On prend l'heure actuelle pour aujourd'hui, sinon midi
-    int hourlyIndex = dayIndex * 24 + (dayIndex == 0 ? DateTime.now().hour : 12);
+      selectedDayIndex = dayIndex;
+      String targetDate = lastWeatherData!['daily']['time'][dayIndex];
+      String hourString;
+      if (dayIndex == 0) {
+        hourString = DateTime.now().hour.toString().padLeft(2, '0');
+      } else {
+        hourString = "12";
+      }
+      String targetTime = "${targetDate}T$hourString:00";
+      List<dynamic> hourlyTimes = lastWeatherData!['hourly']['time'];
+      int hourlyIndex = hourlyTimes.indexOf(targetTime);
 
     temperature = lastWeatherData!['hourly']['temperature_2m'][hourlyIndex].toString();
     felt = lastWeatherData!['hourly']['apparent_temperature'][hourlyIndex].toString();
@@ -187,7 +195,7 @@ class _HomePageState extends State<HomePage> {
            
             if (isLoading)
               Container(
-                color: Colors.black.withOpacity(0.3), 
+                color: Color.fromARGB(10, 0, 0, 0), 
                 child: const Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -338,8 +346,8 @@ class _HomePageState extends State<HomePage> {
                 margin: const EdgeInsets.only(right: 12),
                 decoration: BoxDecoration(
                   color: selectedDayIndex == index 
-                    ? Colors.white.withOpacity(0.3) 
-                    : Colors.white.withOpacity(0.15),
+                    ? Color.fromARGB(10, 255, 255, 255)
+                    : Color.fromARGB(30, 255, 255, 255),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: selectedDayIndex == index ? Colors.white : Colors.transparent,
