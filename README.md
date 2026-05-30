@@ -49,9 +49,15 @@ google_fonts : Pour la typographie personnalisée.
 ------------------------------------------
 
 📁 Structure du Projet
-lib/pages/home.dart : Interface principale et logique de navigation.
+L'arborescence respecte la séparation des responsabilités du pattern MVVM :
 
-lib/weather_service.dart : Service de gestion des appels API Open-Meteo.
+lib/pages/ : Interface principale, écrans et composants visuels (UI).
+
+lib/viewmodels/ : Logique de présentation, traitement des données pour les vues.
+
+lib/repositories/ : Source Unique de Vérité, gestionnaire de l'état global et de la donnée brute.
+
+lib/services/ : Service de gestion des appels API vers Open-Meteo.
 
 assets/icons/ : Collection d'icônes SVG pour l'interface.
 
