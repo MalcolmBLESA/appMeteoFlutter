@@ -43,4 +43,31 @@ class WeatherService {
     }
     return null;
   }
+
+  Future<List<Map<String, dynamic>>> getCitySuggestions(String query) async {
+    final url = Uri.parse(
+        'https://geocoding-api.open-meteo.com/v1/search?name=$query&count=5&language=fr&format=json');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['results'] != null) {
+          return List<Map<String, dynamic>>.from(data['results'].map((json) => {
+                'name': json['name'],
+                'country': json['country'] ?? '',
+                'admin1': json['admin1'] ?? '',
+                'postcode': (json['postcodes'] != null && json['postcodes'].isNotEmpty)
+                    ? json['postcodes'][0]
+                    : null,
+                'lat': json['latitude'],
+                'lon': json['longitude'],
+              }));
+        }
+      }
+    } catch (e) {
+      debugPrint("Erreur suggestions : $e");
+    }
+    return [];
+  }
 }
