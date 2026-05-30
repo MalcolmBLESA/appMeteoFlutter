@@ -107,29 +107,89 @@ class _HomePageState extends State<HomePage> {
       decoration: const BoxDecoration(
         boxShadow: [BoxShadow(color: Color.fromARGB(200, 0, 0, 0), blurRadius: 40)],
       ),
-      child: TextField(
-        onSubmitted: (value) => _viewModel.searchCity(value),
-        decoration: InputDecoration(
-          hintText: 'Rechercher une ville',
-          filled: true,
-          fillColor: const Color.fromARGB(250, 255, 255, 255),
-          contentPadding: const EdgeInsets.all(0),
-          suffixIcon: GestureDetector(
-            onTap: _pickDateRange,
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: SvgPicture.asset('assets/icons/calendar-days-svgrepo-com.svg'),
+      child: Autocomplete<Map<String, dynamic>>(
+        //Va prendre les data par le ViewModel
+        optionsBuilder: (TextEditingValue textEditingValue) async {
+          return await _viewModel.searchCitySuggestions(textEditingValue.text);
+        },
+        //Définit ce qui s'affiche quand sélectionné
+        displayStringForOption: (option) => option['name'] as String,
+        // clic sur une ville
+        onSelected: (option) {
+          _viewModel.selectCityFromSuggestion(option);
+          FocusScope.of(context).unfocus(); 
+        },
+        fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+          return TextField(
+            controller: controller,
+            focusNode: focusNode,
+            onEditingComplete: onEditingComplete,
+            decoration: InputDecoration(
+              hintText: 'Rechercher une ville',
+              filled: true,
+              fillColor: const Color.fromARGB(250, 255, 255, 255),
+              contentPadding: const EdgeInsets.all(0),
+              suffixIcon: GestureDetector(
+                onTap: _pickDateRange,
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: SvgPicture.asset('assets/icons/calendar-days-svgrepo-com.svg'),
+                ),
+              ),
+              prefixIcon: SizedBox(
+                width: 50,
+                child: Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: SvgPicture.asset('assets/icons/loupe-search-svgrepo-com (1).svg'),
+                ),
+              ),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
             ),
-          ),
-          prefixIcon: SizedBox(
-            width: 50,
-            child: Padding(
-              padding: const EdgeInsets.all(5),
-              child: SvgPicture.asset('assets/icons/loupe-search-svgrepo-com (1).svg'),
+          );
+        },
+        //Le design du menu déroulant
+        optionsViewBuilder: (context, onSelected, options) {
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              color: Colors.white,
+              elevation: 4.0,
+              borderRadius: BorderRadius.circular(15),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: 250,
+                  maxWidth: MediaQuery.of(context).size.width - 40, 
+                ),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final option = options.elementAt(index);
+                    // Formatage des data sous le titre
+                    final country = option['country'] ?? '';
+                    final region = option['admin1'] != null && option['admin1'].toString().isNotEmpty ? '${option['admin1']} - ' : '';
+                    final postcode = option['postcode'] != null ? ' (${option['postcode']})' : '';
+
+                    return ListTile(
+                      leading: const Icon(Icons.location_on, color: Color.fromARGB(255, 64, 141, 235)),
+                      title: Text(
+                        option['name'], 
+                        style: const TextStyle(fontWeight: FontWeight.bold)
+                      ),
+                      subtitle: Text(
+                        '$region$country$postcode', 
+                        style: const TextStyle(fontSize: 12)
+                      ),
+                      onTap: () => onSelected(option),
+                    );
+                  },
+                ),
+              ),
             ),
-          ),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
-        ),
+          );
+        },
       ),
     );
   }

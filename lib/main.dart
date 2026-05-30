@@ -7,13 +7,12 @@ import 'services/weather_service.dart';
 import 'repositories/weather_repository.dart';
 
 void main() {
-  // 1. Création du service pur
+  //Création du service pur
   final weatherService = WeatherService();
-  
-  // 2. Injection du service dans la Source Unique de Vérité
-  final weatherRepository = WeatherRepository(weatherService);
 
-  // 3. Lancement de l'app avec la donnée injectée
+  //Injection du service dans la Source Unique de Vérité
+  final weatherRepository = WeatherRepository(weatherService);
+  //Lancement de l'app avec la donnée injectée
   runApp(MyApp(repository: weatherRepository));
 }
 
