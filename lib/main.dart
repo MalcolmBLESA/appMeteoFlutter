@@ -1,24 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:meteo_aquatech/pages/home.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'pages/home.dart';
+import 'services/weather_service.dart';
+import 'repositories/weather_repository.dart';
+
 void main() {
-  runApp(const MyApp());
+  // 1. Création du service pur
+  final weatherService = WeatherService();
+  
+  // 2. Injection du service dans la Source Unique de Vérité
+  final weatherRepository = WeatherRepository(weatherService);
+
+  // 3. Lancement de l'app avec la donnée injectée
+  runApp(MyApp(repository: weatherRepository));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final WeatherRepository repository;
+
+  const MyApp({super.key, required this.repository});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'App Météo',
-      
-      // Désactive la bannière debug
       debugShowCheckedModeBanner: false,
-
-      // --- CONFIGURATION DE LA LANGUE ---
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -28,18 +36,13 @@ class MyApp extends StatelessWidget {
         Locale('en'), 
         Locale('fr'), 
       ],
-
-      // --- PERSONNALISATION DU THÈME ---
       theme: ThemeData(
-        // Active les composants visuels modernes de Google (Material 3)
         useMaterial3: true,
-        
-        // Applique la police "Montserrat" à l'ensemble de l'application via Google Fonts
         textTheme: GoogleFonts.montserratTextTheme(
           Theme.of(context).textTheme,
         ),
       ),
-      home: const HomePage(),
+      home: HomePage(repository: repository),
     );
   }
 }
