@@ -57,6 +57,23 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners(); // Met à jour uniquement la vue liée à ce ViewModel
   }
 
+  // --- LOGIQUE AUTOCOMPLÉTION ---
+  
+  // Appelé à chaque lettre tapée par l'utilisateur
+  Future<Iterable<Map<String, dynamic>>> searchCitySuggestions(String query) async {
+    if (query.length < 2) return const Iterable.empty();
+    return await _repository.getCitySuggestions(query);
+  }
+
+  // Appelé quand l'utilisateur clique sur un choix dans la liste
+  void selectCityFromSuggestion(Map<String, dynamic> cityData) {
+    _repository.fetchWeatherForLocation(
+      cityData['lat'],
+      cityData['lon'],
+      cityData['name'],
+    );
+  }
+
   // --- LOGIQUE MÉTIER INTERNE ---
   // Toute l'ancienne logique complexe de recherche d'index horaire est isolée ici
   String _getHourlyValue(String key) {
